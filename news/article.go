@@ -24,7 +24,10 @@ func CleanContent(e *colly.HTMLElement, selector string) string {
 	content := clone.Find(selector)
 	cssExclude := strings.Join(cfg.CssContentExclude, ", ")
 	content.Find(cssExclude).Remove()
-	text := content.Text()
+	return TrimAllString(content.Text())
+}
+
+func TrimAllString(text string) string {
 	text = strings.ReplaceAll(text, "\n", " ")
 	text = strings.ReplaceAll(text, "\t", " ")
 	re := regexp.MustCompile(`\s+`)
@@ -41,7 +44,7 @@ func DetectPagination(e *colly.HTMLElement, selector string) bool {
 	}
 }
 
-func ParseDateTime(timeStr string, layout string) (time.Time, error) {
+func ConvertDateTime(timeStr string, layout string) (time.Time, error) {
 	tz := "Asia/Jakarta"
 	months := map[string]string{
 		"Jan": "Jan", "Feb": "Feb", "Mar": "Mar", "Apr": "Apr",

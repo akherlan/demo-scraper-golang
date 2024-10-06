@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"crypto/md5"
-	"encoding/binary"
 	"log"
 	"scraper/news"
 	"time"
@@ -43,10 +42,9 @@ func Upsert(item news.Article, c *mongo.Collection) {
 	}
 }
 
-func CreateObjectID(id string, t time.Time) primitive.ObjectID {
+func DefineObjectID(id string) primitive.ObjectID {
 	oid := [12]byte{}
-	binary.BigEndian.PutUint32(oid[:4], uint32(t.Unix()))
 	idHash := md5.Sum([]byte(id))
-	copy(oid[4:], idHash[8:])
+	copy(oid[:], idHash[:12])
 	return primitive.ObjectID(oid)
 }

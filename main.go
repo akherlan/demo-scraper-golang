@@ -41,6 +41,7 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 	allowedDomain := cfg.Sources[source].Domain
 
 	c := colly.NewCollector(colly.AllowedDomains(allowedDomain))
+	c.UserAgent = cfg.UserAgent
 	cc := c.Clone()
 
 	c.OnHTML(selector.URL, func(e *colly.HTMLElement) {
@@ -76,18 +77,22 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 
 func collectArticle(e *colly.HTMLElement, s config.SelectorConfig) news.Article {
 	articleURL := e.Request.URL.String()
+	published, _ := news.ConvertDateTime(parseDatePublished(e, s), s.PublishedDate.TimeFormat)
+	return news.Article{
+		ID:        db.DefineObjectID(articleURL),
+		Title:     e.ChildText(s.Title),
+		URL:       articleURL,
+		Published: published,
+		Content:   news.CleanContent(e, s.Content),
+	}
+}
+
+func parseDatePublished(e *colly.HTMLElement, s config.SelectorConfig) string {
 	var timeString string
 	if s.PublishedDate.Attr != "" {
 		timeString = e.ChildAttr(s.PublishedDate.Css, s.PublishedDate.Attr)
 	} else {
 		timeString = e.ChildText(s.PublishedDate.Css)
 	}
-	published, _ := news.ParseDateTime(timeString, s.PublishedDate.TimeFormat)
-	return news.Article{
-		ID:        db.CreateObjectID(articleURL, published),
-		Title:     e.ChildText(s.Title),
-		URL:       articleURL,
-		Published: published,
-		Content:   news.CleanContent(e, s.Content),
-	}
+	return timeString
 }

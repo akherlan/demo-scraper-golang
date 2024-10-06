@@ -5,6 +5,7 @@ import "github.com/spf13/viper"
 type Config struct {
 	MongoDBName       string
 	MongoCollection   string
+	UserAgent         string
 	Sources           map[string]SourceConfig
 	Selectors         map[string]SelectorConfig
 	CssContentExclude []string
