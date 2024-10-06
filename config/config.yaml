@@ -1,0 +1,39 @@
+mongoDBName: "news"
+mongoCollection: "articles"
+sources:
+  detik:
+    domain: "news.detik.com"
+    startURL: "https://news.detik.com/indeks/"
+  liputan6:
+    domain: "www.liputan6.com"
+    startURL: "https://www.liputan6.com"
+selectors:
+  detik:
+    URL: "article.list-content__item h3 > a"
+    articleContainer: "article.detail"
+    title: "h1"
+    publishedDate:
+      css: ".detail__date"
+      attr: ""
+      timeFormat: "02 Jan 2006 15:04 MST"
+    content: ".detail__body-text"
+    pageIndex: ".detail__multiple a"
+  liputan6:
+    URL: "article h4 > a"
+    articleContainer: "article.main"
+    title: "h1[itemprop=headline]"
+    publishedDate:
+      css: "time[itemprop=datePublished]"
+      attr: "datetime"
+      timeFormat: "2006-01-02 15:04:05"
+    content: "div[class*=body__item-content]"
+    pageIndex: ".article-content-body__item-break-index"
+cssContentExclude:
+  - "style"
+  - "script"
+  - "#collapsible"
+  - ".scrollpage"
+  - ".linksisip"
+  - ".staticdetail_container"
+  - "[class*=advertisement]"
+  - "[class*=baca-juga]"
