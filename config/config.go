@@ -6,9 +6,15 @@ type Config struct {
 	MongoDBName       string
 	MongoCollection   string
 	UserAgent         string
+	Scraper           ScraperConfig
 	Sources           map[string]SourceConfig
 	Selectors         map[string]SelectorConfig
 	CssContentExclude []string
+}
+
+type ScraperConfig struct {
+	UserAgent string
+	Timeout   int
 }
 
 type SourceConfig struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gocolly/colly/v2"
 	"github.com/joho/godotenv"
@@ -41,7 +42,8 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 	allowedDomain := cfg.Sources[source].Domain
 
 	c := colly.NewCollector(colly.AllowedDomains(allowedDomain))
-	c.UserAgent = cfg.UserAgent
+	c.UserAgent = cfg.Scraper.UserAgent
+	c.SetRequestTimeout(time.Duration(cfg.Scraper.Timeout) * time.Second)
 	cc := c.Clone()
 
 	c.OnHTML(selector.URL, func(e *colly.HTMLElement) {
@@ -98,9 +100,11 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 }
 
 func collectArticleHTML(e *colly.HTMLElement, s config.SelectorConfig) news.Article {
+	timeFormat := s.PublishedDate.TimeFormat
 	articleURL := e.Request.URL.String()
 	articleID := news.GetIDFromURL(articleURL)
-	published, _ := news.ConvertDateTime(parseDatePublished(e, s), s.PublishedDate.TimeFormat)
+	dtString := news.ParseDatePublished(e, s)
+	published, _ := news.ConvertDateTime(dtString, timeFormat)
 	return news.Article{
 		ID:        db.DefineObjectID(articleID),
 		Title:     e.ChildText(s.Title),
@@ -121,14 +125,4 @@ func collectArticleJsonLD(j news.JsonLD) news.Article {
 		Published: published,
 		Content:   news.CleanContentLiputan6(j.Content),
 	}
-}
-
-func parseDatePublished(e *colly.HTMLElement, s config.SelectorConfig) string {
-	var timeString string
-	if s.PublishedDate.Attr != "" {
-		timeString = e.ChildAttr(s.PublishedDate.Css, s.PublishedDate.Attr)
-	} else {
-		timeString = e.ChildText(s.PublishedDate.Css)
-	}
-	return timeString
 }

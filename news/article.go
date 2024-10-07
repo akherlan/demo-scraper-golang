@@ -124,6 +124,16 @@ func ConvertDateTime(timeStr string, layout string) (time.Time, error) {
 	return t, nil
 }
 
+func ParseDatePublished(e *colly.HTMLElement, s config.SelectorConfig) string {
+	var timeString string
+	if s.PublishedDate.Attr != "" {
+		timeString = e.ChildAttr(s.PublishedDate.Css, s.PublishedDate.Attr)
+	} else {
+		timeString = e.ChildText(s.PublishedDate.Css)
+	}
+	return timeString
+}
+
 func GetIDFromURL(url string) string {
 	parts := strings.Split(url, "/")
 	if len(parts) >= 2 {
