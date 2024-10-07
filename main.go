@@ -48,10 +48,25 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 		cc.Visit(e.Attr("href"))
 	})
 
-	cc.OnHTML(selector.ArticleContainer, func(e *colly.HTMLElement) {
-		article := collectArticle(e, selector)
-		db.Upsert(article, collection)
-	})
+	if selector.Jsonld != "" {
+		// JSON-LD content parsing
+		cc.OnHTML(selector.Jsonld, func(e *colly.HTMLElement) {
+			object, err := news.FromJsonLdString(e.Text)
+			if len(object) > 0 {
+				article := collectArticleJsonLD(object[0])
+				db.Upsert(article, collection)
+			} else {
+				log.Println("Failed to parse JSON-LD:", err)
+			}
+		})
+	} else {
+		// HTML content parsing
+		cc.OnHTML(selector.ArticleContainer, func(e *colly.HTMLElement) {
+			article := collectArticleHTML(e, selector)
+			log.Println("detect pagination:", news.DetectPagination(e, selector.PageIndex))
+			db.Upsert(article, collection)
+		})
+	}
 
 	c.OnResponse(func(r *colly.Response) {
 		log.Println(r.StatusCode, r.Request.URL)
@@ -75,7 +90,7 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 	}
 }
 
-func collectArticle(e *colly.HTMLElement, s config.SelectorConfig) news.Article {
+func collectArticleHTML(e *colly.HTMLElement, s config.SelectorConfig) news.Article {
 	articleURL := e.Request.URL.String()
 	published, _ := news.ConvertDateTime(parseDatePublished(e, s), s.PublishedDate.TimeFormat)
 	return news.Article{
@@ -83,7 +98,19 @@ func collectArticle(e *colly.HTMLElement, s config.SelectorConfig) news.Article 
 		Title:     e.ChildText(s.Title),
 		URL:       articleURL,
 		Published: published,
-		Content:   news.CleanContent(e, s.Content),
+		Content:   news.CleanContentHTML(e, s.Content),
+	}
+}
+
+func collectArticleJsonLD(j news.JsonLD) news.Article {
+	timeFormat := "2006-01-02T15:04:05-07:00"
+	published, _ := news.ConvertDateTime(j.Published, timeFormat)
+	return news.Article{
+		ID:        db.DefineObjectID(j.URL),
+		Title:     j.Title,
+		URL:       j.URL,
+		Published: published,
+		Content:   news.CleanContentLiputan6(j.Content),
 	}
 }
 

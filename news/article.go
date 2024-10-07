@@ -1,6 +1,9 @@
 package news
 
 import (
+	"encoding/json"
+	"html"
+	"log"
 	"regexp"
 	"scraper/config"
 	"strings"
@@ -18,7 +21,37 @@ type Article struct {
 	Content   string             `json:"content" bson:"content"`
 }
 
-func CleanContent(e *colly.HTMLElement, selector string) string {
+type JsonLD struct {
+	Title     string `json:"headline"`
+	Type      string `json:"@type"`
+	URL       string `json:"mainEntityOfPage"`
+	Published string `json:"datePublished"`
+	Content   string `json:"articleBody"`
+}
+
+var monthsAbbr = map[string]string{
+	"Jan": "Jan", "Feb": "Feb", "Mar": "Mar", "Apr": "Apr",
+	"Mei": "May", "Jun": "Jun", "Jul": "Jul", "Agu": "Aug",
+	"Sep": "Sep", "Okt": "Oct", "Nov": "Nov", "Des": "Dec",
+}
+
+func FromJsonLdString(text string) ([]JsonLD, error) {
+	var objects []JsonLD
+	var data []JsonLD
+	err := json.Unmarshal([]byte(text), &objects)
+	if err != nil {
+		log.Printf("Error parsing JSON-LD: %v", err)
+		return nil, err
+	}
+	for _, item := range objects {
+		if item.Type == "NewsArticle" || item.Type == "Article" {
+			data = append(data, item)
+		}
+	}
+	return data, nil
+}
+
+func CleanContentHTML(e *colly.HTMLElement, selector string) string {
 	cfg, _ := config.Load()
 	clone := e.DOM.Clone()
 	content := clone.Find(selector)
@@ -27,13 +60,40 @@ func CleanContent(e *colly.HTMLElement, selector string) string {
 	return TrimAllString(content.Text())
 }
 
+func CleanContentLiputan6(text string) string {
+	text = RemoveRecommendation(text)
+	text = RemoveMedia(text)
+	text = html.UnescapeString(text)
+	text = TrimAllString(text)
+	return text
+}
+
 func TrimAllString(text string) string {
 	text = strings.ReplaceAll(text, "\n", " ")
 	text = strings.ReplaceAll(text, "\t", " ")
-	re := regexp.MustCompile(`\s+`)
-	text = re.ReplaceAllString(text, " ")
+	text = ReplacePattern(text, `\s+`, " ")
 	text = strings.TrimSpace(text)
 	return text
+}
+
+func RemoveRecommendation(text string) string {
+	articlePttrn := `\[bacajuga:Baca Juga\]\(\d+(?:\s+\d+)*\)`
+	// [bacajuga:Baca Juga](digits)
+	return ReplacePattern(text, articlePttrn, " ")
+}
+
+func RemoveMedia(text string) string {
+	mediaPttrn := `(?:Simak Video Pilihan Ini:)?\[vidio:[^\]]+\]\(https?://[^\)]+\)`
+	// [vidio:Judul](https://link)
+	return ReplacePattern(text, mediaPttrn, " ")
+}
+
+func ReplacePattern(text string, pattern string, repl string) string {
+	re := regexp.MustCompile(pattern)
+	if !re.MatchString(text) {
+		return text
+	}
+	return re.ReplaceAllString(text, repl)
 }
 
 func DetectPagination(e *colly.HTMLElement, selector string) bool {
@@ -46,16 +106,11 @@ func DetectPagination(e *colly.HTMLElement, selector string) bool {
 
 func ConvertDateTime(timeStr string, layout string) (time.Time, error) {
 	tz := "Asia/Jakarta"
-	months := map[string]string{
-		"Jan": "Jan", "Feb": "Feb", "Mar": "Mar", "Apr": "Apr",
-		"Mei": "May", "Jun": "Jun", "Jul": "Jul", "Agu": "Aug",
-		"Sep": "Sep", "Okt": "Oct", "Nov": "Nov", "Des": "Dec",
-	}
 	parts := strings.SplitN(timeStr, ", ", 2)
 	if len(parts) > 1 {
 		timeStr = strings.TrimSpace(parts[1])
 	}
-	for ind, eng := range months {
+	for ind, eng := range monthsAbbr {
 		timeStr = strings.Replace(timeStr, ind, eng, 1)
 	}
 	loc, err := time.LoadLocation(tz)

@@ -27,6 +27,7 @@ type SelectorConfig struct {
 	}
 	Content   string
 	PageIndex string
+	Jsonld    string
 }
 
 func Load() (*Config, error) {

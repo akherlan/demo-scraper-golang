@@ -19,6 +19,7 @@ selectors:
       timeFormat: "02 Jan 2006 15:04 MST"
     content: ".detail__body-text"
     pageIndex: ".detail__multiple a"
+    jsonld: ""
   liputan6:
     URL: "article h4 > a"
     articleContainer: "article.main"
@@ -29,6 +30,7 @@ selectors:
       timeFormat: "2006-01-02 15:04:05"
     content: "div[class*=body__item-content]"
     pageIndex: ".article-content-body__item-break-index"
+    jsonld: "script[id=rich-card]"
 cssContentExclude:
   - "style"
   - "script"
