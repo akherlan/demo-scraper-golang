@@ -56,15 +56,22 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 				article := collectArticleJsonLD(object[0])
 				db.Upsert(article, collection)
 			} else {
-				log.Println("Failed to parse JSON-LD:", err)
+				log.Println("Empty JSON-LD:", err)
 			}
 		})
 	} else {
 		// HTML content parsing
 		cc.OnHTML(selector.ArticleContainer, func(e *colly.HTMLElement) {
 			article := collectArticleHTML(e, selector)
-			log.Println("detect pagination:", news.DetectPagination(e, selector.PageIndex))
-			db.Upsert(article, collection)
+			isMultiplePages := news.DetectPagination(e, selector.PageIndex)
+			if isMultiplePages {
+				log.Println("Detect pagination:", article.URL)
+				updatedURL := e.Request.URL.String() + "?single=1"
+				cc.Visit(updatedURL)
+			} else {
+				// save if all-pages link accessed
+				db.Upsert(article, collection)
+			}
 		})
 	}
 
@@ -92,9 +99,10 @@ func scrape(source string, collection *mongo.Collection, cfg *config.Config) {
 
 func collectArticleHTML(e *colly.HTMLElement, s config.SelectorConfig) news.Article {
 	articleURL := e.Request.URL.String()
+	articleID := news.GetIDFromURL(articleURL)
 	published, _ := news.ConvertDateTime(parseDatePublished(e, s), s.PublishedDate.TimeFormat)
 	return news.Article{
-		ID:        db.DefineObjectID(articleURL),
+		ID:        db.DefineObjectID(articleID),
 		Title:     e.ChildText(s.Title),
 		URL:       articleURL,
 		Published: published,
@@ -104,9 +112,10 @@ func collectArticleHTML(e *colly.HTMLElement, s config.SelectorConfig) news.Arti
 
 func collectArticleJsonLD(j news.JsonLD) news.Article {
 	timeFormat := "2006-01-02T15:04:05-07:00"
+	articleID := news.GetIDFromURL(j.URL)
 	published, _ := news.ConvertDateTime(j.Published, timeFormat)
 	return news.Article{
-		ID:        db.DefineObjectID(j.URL),
+		ID:        db.DefineObjectID(articleID),
 		Title:     j.Title,
 		URL:       j.URL,
 		Published: published,

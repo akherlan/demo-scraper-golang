@@ -3,7 +3,6 @@ package news
 import (
 	"encoding/json"
 	"html"
-	"log"
 	"regexp"
 	"scraper/config"
 	"strings"
@@ -40,7 +39,6 @@ func FromJsonLdString(text string) ([]JsonLD, error) {
 	var data []JsonLD
 	err := json.Unmarshal([]byte(text), &objects)
 	if err != nil {
-		log.Printf("Error parsing JSON-LD: %v", err)
 		return nil, err
 	}
 	for _, item := range objects {
@@ -77,14 +75,16 @@ func TrimAllString(text string) string {
 }
 
 func RemoveRecommendation(text string) string {
-	articlePttrn := `\[bacajuga:Baca Juga\]\(\d+(?:\s+\d+)*\)`
+	// Liputan6
 	// [bacajuga:Baca Juga](digits)
+	articlePttrn := `\[bacajuga:Baca Juga\]\(\d+(?:\s+\d+)*\)`
 	return ReplacePattern(text, articlePttrn, " ")
 }
 
 func RemoveMedia(text string) string {
-	mediaPttrn := `(?:Simak Video Pilihan Ini:)?\[vidio:[^\]]+\]\(https?://[^\)]+\)`
+	// Liputan6
 	// [vidio:Judul](https://link)
+	mediaPttrn := `(?:Simak Video Pilihan Ini:)?\[vidio:[^\]]+\]\(https?://[^\)]+\)`
 	return ReplacePattern(text, mediaPttrn, " ")
 }
 
@@ -122,4 +122,12 @@ func ConvertDateTime(timeStr string, layout string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	return t, nil
+}
+
+func GetIDFromURL(url string) string {
+	parts := strings.Split(url, "/")
+	if len(parts) >= 2 {
+		return parts[len(parts)-2]
+	}
+	return ""
 }

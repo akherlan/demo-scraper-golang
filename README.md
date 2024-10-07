@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project was developed as part of the technical test for my application to join Ivosights and was not production ready.
+This project was developed as part of the technical test for my application to join Ivosights and is not production ready.
 
 The objective of this project was to develop two news scrapers specifically designed for Detik.com and Liputan6.com, with the purpose of retrieving the most recent news articles available on these platforms.
 
@@ -32,15 +32,18 @@ I hope that my work showcases potential value I could bring to the team at Ivosi
 - **Functionality**:
   - Collect the latest available news articles from both websites
   - Automatically creates unique IDs from article URLs to prevent duplicate entries in the database, safe for multiple times run
+  - Handle multiple pages news article to get full text article version, methods:
+    - Using pagination DOM detection
+    - Parsing JSON-LD schema instead of rendering DOM using JavaScript
   - Provides clean news text with advertisement removal text content
 - **Not implemented**:
-  - JavaScript dynamic rendering or headless browser automation (to load more data from Liputan6 website)
-  - Multiple pages crawling (focus on the latest news articles only and avoid to crawl all pages)
-  - Manage scheduling for scraper
+  - JavaScript dynamic rendering or headless browser automation (not necessary for this work)
+  - Paginated crawling (focus on the latest news articles only and avoid to crawl all pages)
+  - Manage scheduling for scraper recurring process
   - Options and arguments for advanced application control
   - Proxy settings
 
-While certain advanced features were not implemented in this version, this decision was made to prioritize lightweight performance and simplicity for the purposes of technical test and local execution. It will keep the application simple and not requiring to use complex configuration to test and run.
+While certain advanced features were not implemented in this version, this decision was made to prioritize lightweight performance and simplicity for the purposes of technical test and local execution as necessary. It will keep the application simple and not requiring to use complex configuration to test and run.
 
 However, the project was designed with future extensibility in mind. It hopfully can accommodate additional capabilities as needed, ensuring scalability and adaptability to evolving requirements.
 
@@ -67,6 +70,8 @@ scraper
 ```
 
 ## Data Structure
+
+The following is an example of the data structure stored in the database:
 
 ```json
 [
@@ -122,4 +127,3 @@ The project showcases my technical skills and problem-solving abilities, which I
 Thank you for considering my application. I look forward to hear from you again.
 
 -- [Andi Herlan](https://github.com/akherlan)
-

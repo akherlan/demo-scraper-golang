@@ -1222,7 +1222,7 @@ body {
 }
 </style><title>README</title></head><body><article class="markdown-body"><div class="markdown-heading"><h1 class="heading-element">Ivosights Technical Test - News Scraper</h1><a id="user-content-ivosights-technical-test---news-scraper" class="anchor" aria-label="Permalink: Ivosights Technical Test - News Scraper" href="#ivosights-technical-test---news-scraper"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <div class="markdown-heading"><h2 class="heading-element">Overview</h2><a id="user-content-overview" class="anchor" aria-label="Permalink: Overview" href="#overview"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<p>This project was developed as part of the technical test for my application to join Ivosights and was not production ready.</p>
+<p>This project was developed as part of the technical test for my application to join Ivosights and is not production ready.</p>
 <p>The objective of this project was to develop two news scrapers specifically designed for Detik.com and Liputan6.com, with the purpose of retrieving the most recent news articles available on these platforms.</p>
 <div class="markdown-heading"><h2 class="heading-element">Accomplishments</h2><a id="user-content-accomplishments" class="anchor" aria-label="Permalink: Accomplishments" href="#accomplishments"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>I am pleased to report that I have successfully completed the homework test as requested. The project demonstrates my ability to:</p>
@@ -1253,21 +1253,27 @@ body {
 <ul>
 <li>Collect the latest available news articles from both websites</li>
 <li>Automatically creates unique IDs from article URLs to prevent duplicate entries in the database, safe for multiple times run</li>
+<li>Handle multiple pages news article to get full text article version, methods:
+<ul>
+<li>Using pagination DOM detection</li>
+<li>Parsing JSON-LD schema instead of rendering DOM using JavaScript</li>
+</ul>
+</li>
 <li>Provides clean news text with advertisement removal text content</li>
 </ul>
 </li>
 <li>
 <strong>Not implemented</strong>:
 <ul>
-<li>JavaScript dynamic rendering or headless browser automation (to load more data from Liputan6 website)</li>
-<li>Multiple pages crawling (focus on the latest news articles only and avoid to crawl all pages)</li>
-<li>Manage scheduling for scraper</li>
+<li>JavaScript dynamic rendering or headless browser automation (not necessary for this work)</li>
+<li>Paginated crawling (focus on the latest news articles only and avoid to crawl all pages)</li>
+<li>Manage scheduling for scraper recurring process</li>
 <li>Options and arguments for advanced application control</li>
 <li>Proxy settings</li>
 </ul>
 </li>
 </ul>
-<p>While certain advanced features were not implemented in this version, this decision was made to prioritize lightweight performance and simplicity for the purposes of technical test and local execution. It will keep the application simple and not requiring to use complex configuration to test and run.</p>
+<p>While certain advanced features were not implemented in this version, this decision was made to prioritize lightweight performance and simplicity for the purposes of technical test and local execution as necessary. It will keep the application simple and not requiring to use complex configuration to test and run.</p>
 <p>However, the project was designed with future extensibility in mind. It hopfully can accommodate additional capabilities as needed, ensuring scalability and adaptability to evolving requirements.</p>
 <div class="markdown-heading"><h2 class="heading-element">Project Structure</h2><a id="user-content-project-structure" class="anchor" aria-label="Permalink: Project Structure" href="#project-structure"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>The project is structured to ensure modularity and improve organization to ease of maintenance and scalability.</p>
@@ -1288,6 +1294,7 @@ body {
 └── sample.env          # sample environment variable
 </code></pre>
 <div class="markdown-heading"><h2 class="heading-element">Data Structure</h2><a id="user-content-data-structure" class="anchor" aria-label="Permalink: Data Structure" href="#data-structure"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>The following is an example of the data structure stored in the database:</p>
 <div class="highlight highlight-source-json"><pre>[
   {
     <span class="pl-ent">"_id"</span>: {
