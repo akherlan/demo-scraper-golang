@@ -1,0 +1,9 @@
+source:
+  - name: detik
+    domain: news.detik.com
+    startURL: https://news.detik.com/indeks
+    method: html
+  - name: liputan6
+    domain: www.liputan6.com
+    startURL: https://www.liputan6.com
+    method: jsonld

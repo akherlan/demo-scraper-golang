@@ -3,37 +3,36 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	MongoDBName       string
-	MongoCollection   string
-	UserAgent         string
-	Scraper           ScraperConfig
-	Sources           map[string]SourceConfig
-	Selectors         map[string]SelectorConfig
+	Database          Database
+	Scraper           Scraper
+	Selectors         map[string]Selector
 	CssContentExclude []string
 }
 
-type ScraperConfig struct {
+type Database struct {
+	Name       string
+	Collection string
+}
+
+type Scraper struct {
 	UserAgent string
 	Timeout   int
 }
 
-type SourceConfig struct {
-	Domain   string
-	StartURL string
-}
-
-type SelectorConfig struct {
+type Selector struct {
 	URL              string
 	ArticleContainer string
 	Title            string
-	PublishedDate    struct {
-		Css        string
-		Attr       string
-		TimeFormat string
-	}
-	Content   string
-	PageIndex string
-	Jsonld    string
+	PublishedDate    DateSelector
+	Content          string
+	PageIndex        string
+	Jsonld           string
+}
+
+type DateSelector struct {
+	Css        string
+	Attr       string
+	TimeFormat string
 }
 
 func Load() (*Config, error) {
