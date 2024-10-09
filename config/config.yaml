@@ -1,9 +1,15 @@
-database:
-  name: "news"
-  collection: "articles"
+mongoDBName: "news"
+mongoCollection: "articles"
 scraper:
   userAgent: "NewsCollection/0"
   timeout: 30
+sources:
+  detik:
+    domain: "news.detik.com"
+    startURL: "https://news.detik.com/indeks"
+  liputan6:
+    domain: "www.liputan6.com"
+    startURL: "https://www.liputan6.com"
 selectors:
   detik:
     URL: "article.list-content__item h3 > a"

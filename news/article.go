@@ -1,16 +1,32 @@
-package main
+package news
 
 import (
 	"encoding/json"
 	"html"
 	"regexp"
 	"scraper/config"
-	"scraper/model"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type Article struct {
+	ID        primitive.ObjectID `json:"id" bson:"_id"`
+	Title     string             `json:"title" bson:"title"`
+	URL       string             `json:"url" bson:"url"`
+	Published time.Time          `json:"published" bson:"published"`
+	Content   string             `json:"content" bson:"content"`
+}
+
+type JsonLD struct {
+	Title     string `json:"headline"`
+	Type      string `json:"@type"`
+	URL       string `json:"mainEntityOfPage"`
+	Published string `json:"datePublished"`
+	Content   string `json:"articleBody"`
+}
 
 var monthsAbbr = map[string]string{
 	"Jan": "Jan", "Feb": "Feb", "Mar": "Mar", "Apr": "Apr",
@@ -18,9 +34,9 @@ var monthsAbbr = map[string]string{
 	"Sep": "Sep", "Okt": "Oct", "Nov": "Nov", "Des": "Dec",
 }
 
-func FromJsonLdString(text string) ([]model.NewsArticleJsonLD, error) {
-	var objects []model.NewsArticleJsonLD
-	var data []model.NewsArticleJsonLD
+func FromJsonLdString(text string) ([]JsonLD, error) {
+	var objects []JsonLD
+	var data []JsonLD
 	err := json.Unmarshal([]byte(text), &objects)
 	if err != nil {
 		return nil, err
@@ -39,18 +55,18 @@ func CleanContentHTML(e *colly.HTMLElement, selector string) string {
 	content := clone.Find(selector)
 	cssExclude := strings.Join(cfg.CssContentExclude, ", ")
 	content.Find(cssExclude).Remove()
-	return trimAllString(content.Text())
+	return TrimAllString(content.Text())
 }
 
 func CleanContentLiputan6(text string) string {
-	text = removeRecommendation(text)
-	text = removeMedia(text)
+	text = RemoveRecommendation(text)
+	text = RemoveMedia(text)
 	text = html.UnescapeString(text)
-	text = trimAllString(text)
+	text = TrimAllString(text)
 	return text
 }
 
-func trimAllString(text string) string {
+func TrimAllString(text string) string {
 	text = strings.ReplaceAll(text, "\n", " ")
 	text = strings.ReplaceAll(text, "\t", " ")
 	text = ReplacePattern(text, `\s+`, " ")
@@ -58,14 +74,14 @@ func trimAllString(text string) string {
 	return text
 }
 
-func removeRecommendation(text string) string {
+func RemoveRecommendation(text string) string {
 	// Liputan6
 	// [bacajuga:Baca Juga](digits)
 	articlePttrn := `\[bacajuga:Baca Juga\]\(\d+(?:\s+\d+)*\)`
 	return ReplacePattern(text, articlePttrn, " ")
 }
 
-func removeMedia(text string) string {
+func RemoveMedia(text string) string {
 	// Liputan6
 	// [vidio:Judul](https://link)
 	mediaPttrn := `(?:Simak Video Pilihan Ini:)?\[vidio:[^\]]+\]\(https?://[^\)]+\)`
@@ -108,7 +124,7 @@ func ConvertDateTime(timeStr string, layout string) (time.Time, error) {
 	return t, nil
 }
 
-func ParseDatePublished(e *colly.HTMLElement, s config.Selector) string {
+func ParseDatePublished(e *colly.HTMLElement, s config.SelectorConfig) string {
 	var timeString string
 	if s.PublishedDate.Attr != "" {
 		timeString = e.ChildAttr(s.PublishedDate.Css, s.PublishedDate.Attr)

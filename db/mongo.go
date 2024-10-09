@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"log"
-	"scraper/model"
+	"scraper/news"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,7 +30,7 @@ func Connect(uri string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func Upsert(item model.NewsArticle, c *mongo.Collection) {
+func Upsert(item news.Article, c *mongo.Collection) {
 	opts := options.Update().SetUpsert(true)
 	filter := bson.M{"_id": item.ID}
 	update := bson.M{"$set": item}
