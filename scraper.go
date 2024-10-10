@@ -14,7 +14,7 @@ import (
 )
 
 type Source interface {
-	Scrape()
+	Scrape(coll *mongo.Collection, cfg *config.Config)
 }
 
 type Website struct {

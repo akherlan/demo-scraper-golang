@@ -30,15 +30,17 @@ func Connect(uri string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func Upsert(item model.NewsArticle, c *mongo.Collection) {
+func Upsert(item model.NewsArticle, c *mongo.Collection) error {
 	opts := options.Update().SetUpsert(true)
 	filter := bson.M{"_id": item.ID}
 	update := bson.M{"$set": item}
 	_, err := c.UpdateOne(context.Background(), filter, update, opts)
 	if err != nil {
 		log.Printf("Error insert: %v", err)
+		return err
 	} else {
 		log.Printf("Update news - %s", item.Title)
+		return nil
 	}
 }
 
