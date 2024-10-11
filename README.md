@@ -63,10 +63,13 @@ scraper
 ├── go.sum
 ├── LICENSE.txt         # license file
 ├── main.go             # entry point of the app
-├── news
-│   └── article.go      # defines data struct, logic, model, method
+├── model
+│   └── model.go        # data schema or model
+├── parser.go           # HTML and JSON parser
 ├── README.md           # project explanation and documentation
-└── sample.env          # sample environment variable
+├── sample.env          # sample environment variable
+│   scraper.go          # data struct, logic, model, method
+└── source.yaml         # target website config
 ```
 
 ## Data Structure
@@ -102,7 +105,8 @@ go mod download
 The application can be run using one of following methods. First, directly run the `main.go` file:
 
 ```shell
-go run main.go
+# don't miss the dot
+go run .
 ```
 
 Or second, compile and run the binary:

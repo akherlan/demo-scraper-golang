@@ -1288,10 +1288,13 @@ body {
 ├── go.sum
 ├── LICENSE.txt         # license file
 ├── main.go             # entry point of the app
-├── news
-│   └── article.go      # defines data struct, logic, model, method
+├── model
+│   └── model.go        # data schema or model
+├── parser.go           # HTML and JSON parser
 ├── README.md           # project explanation and documentation
-└── sample.env          # sample environment variable
+├── sample.env          # sample environment variable
+│   scraper.go          # data struct, logic, model, method
+└── source.yaml         # target website config
 </code></pre>
 <div class="markdown-heading"><h2 class="heading-element">Data Structure</h2><a id="user-content-data-structure" class="anchor" aria-label="Permalink: Data Structure" href="#data-structure"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>The following is an example of the data structure stored in the database:</p>
@@ -1313,7 +1316,8 @@ body {
 <p>Go module installation:</p>
 <div class="highlight highlight-source-shell"><pre>go mod download</pre></div>
 <p>The application can be run using one of following methods. First, directly run the <code>main.go</code> file:</p>
-<div class="highlight highlight-source-shell"><pre>go run main.go</pre></div>
+<div class="highlight highlight-source-shell"><pre><span class="pl-c"><span class="pl-c">#</span> don't miss the dot</span>
+go run <span class="pl-c1">.</span></pre></div>
 <p>Or second, compile and run the binary:</p>
 <div class="highlight highlight-source-shell"><pre>go build
 ./scraper</pre></div>
